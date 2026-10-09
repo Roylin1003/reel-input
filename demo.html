@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>reel-input demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="reel-input.css">
+<style>
+  body{margin:0;background:#0f0904;color:#f5e6c8;font-family:'Press Start 2P',monospace;padding:24px;}
+  h2{font-size:14px;margin:24px 0 8px;}
+  .reelInput{max-width:480px;font-family:'Press Start 2P',monospace;}
+  .row{display:flex;gap:12px;align-items:center;margin-top:10px;font-size:12px;}
+  button{font:inherit;padding:10px 16px;background:#0f0904;color:#f0b93a;border:3px solid #f0b93a;}
+  #out{color:#ffb000;}
+</style>
+</head>
+<body>
+<h2>wheel（拉霸）</h2>
+<div id="w"></div>
+<h2>flap（翻牌）</h2>
+<div id="f"></div>
+<div class="row"><button id="ok">確認</button><span id="out"></span></div>
+<script src="reel-input.js"></script>
+<script>
+  const out = document.getElementById('out');
+  const w = ReelInput.create(document.getElementById('w'), { mode: 'wheel', value: 'ROY', onChange: v => out.textContent = 'wheel ' + v });
+  const f = ReelInput.create(document.getElementById('f'), { mode: 'flap', value: 'ROY', keyboard: false, onChange: v => out.textContent = 'flap ' + v });
+  document.getElementById('ok').onclick = () => out.textContent = 'OK ' + w.value + ' / ' + f.value;
+  window.__demo = { w, f }; // 測試用
+</script>
+</body>
+</html>

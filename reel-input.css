@@ -1,0 +1,57 @@
+/* reel-input.css — 配 reel-input.js。主題全部走變數，宿主頁覆寫即可：
+   --reel-fg     滾筒字色（拉霸）            預設暗金
+   --reel-bg     視窗底色                    預設半透黑
+   --reel-frame  視窗上下框線色              預設暗金的暗版
+   --reel-hot    選中那顆的框線／光暈色      預設暗金
+   --reel-shade  弧面漸層的暗色（要跟頁面底色同色系）
+   --reel-size   字級（滾筒一格的字）        預設 28px
+   --reel-line   框線粗細（設計空間會被縮放時，記得放大，縮完別剩髮絲）
+   翻牌（.flap）固定白底黑字——它是「別的材質」，不吃 --reel-fg。 */
+.reelInput{
+  --reel-fg:#f0b93a; --reel-bg:rgba(0,0,0,.5); --reel-frame:#8a5a1e; --reel-hot:#f0b93a;
+  --reel-shade:15,9,4; --reel-size:28px; --reel-line:8px; --reel-gap:10px;
+  display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:var(--reel-gap);
+  font-size:var(--reel-size);
+}
+.reelInput .reel{display:flex;flex-direction:column;align-items:stretch;}
+.reelInput .win{
+  position:relative;overflow:hidden;height:3.9em;box-sizing:content-box;background:var(--reel-bg);
+  touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none;
+  border-top:var(--reel-line) solid var(--reel-frame);border-bottom:var(--reel-line) solid var(--reel-frame);
+  transition:border-color .12s, box-shadow .12s;
+}
+/* 弧面：中間 27%~73% 全透（選中格＋鄰居內側三分之一都是滿亮），往兩端連續壓暗 */
+.reelInput .win:not(.flip)::before{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(var(--reel-shade),.94) 0%, rgba(var(--reel-shade),.62) 10%, rgba(var(--reel-shade),.22) 20%, rgba(var(--reel-shade),0) 27%,
+    rgba(var(--reel-shade),0) 73%, rgba(var(--reel-shade),.22) 80%, rgba(var(--reel-shade),.62) 90%, rgba(var(--reel-shade),.94) 100%);
+}
+.reelInput .strip{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);will-change:transform;}
+.reelInput .strip b{display:block;height:1.3em;line-height:1.3em;text-align:center;font-weight:normal;color:var(--reel-fg);}
+.reelInput .strip b.sel{text-shadow:0 0 .3em color-mix(in srgb, var(--reel-hot) 55%, transparent);}
+.reelInput .reel.here .win{border-color:var(--reel-hot);box-shadow:0 0 14px color-mix(in srgb, var(--reel-hot) 45%, transparent);}
+
+/* ── 翻牌（.flap）：白底黑字，一格分上下兩片，中縫一條黑線 ───────────────── */
+.reelInput .win.flip{perspective:6em;height:2.6em;--flipScale:1.55;}
+.reelInput .half{
+  position:absolute;left:0;right:0;height:50%;overflow:hidden;
+  font-weight:normal;color:#141210;background:#f3efe4;backface-visibility:hidden;
+}
+/* 字放大 --flipScale 倍；i 的高度換算回自己的 em 才仍等於卡片高。1.55 實測墨跡佔卡片高約 49% */
+.reelInput .half i{
+  display:block;font-style:normal;text-align:center;
+  font-size:calc(1em * var(--flipScale));
+  height:calc(2.6em / var(--flipScale));line-height:calc(2.6em / var(--flipScale));
+}
+.reelInput .top{top:0;}
+.reelInput .bot{bottom:0;}
+.reelInput .bot i{margin-top:calc(-1.3em / var(--flipScale));}
+.reelInput .win.flip::after{content:'';position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;background:#141210;z-index:3;}
+/* 兩片動作：上片（舊字）繞下緣往下倒，倒平的瞬間下片換字、新字下片從 −90° 繞上緣立起（同一個擺） */
+.reelInput .flapA{transform-origin:50% 100%;visibility:hidden;z-index:2;}
+.reelInput .flapA.go{visibility:visible;animation:riFlapDown calc(var(--flipMs,360ms) / 2) ease-in both;}
+.reelInput .flapB{transform-origin:50% 0;visibility:hidden;z-index:2;}
+.reelInput .flapB.go{visibility:visible;animation:riFlapUp calc(var(--flipMs,360ms) / 2) calc(var(--flipMs,360ms) / 2) ease-out both;}
+@keyframes riFlapDown{from{transform:rotateX(0);}to{transform:rotateX(-90deg);}}
+@keyframes riFlapUp{from{transform:rotateX(-90deg);}to{transform:rotateX(0);}}
